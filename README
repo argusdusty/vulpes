@@ -17,3 +17,5 @@ To Use: import "github.com/argusdusty/vulpes"
 Notes:
 	1. Because this assumes a zero-sum game, a tie represents a score of 0. Tune your heuristic function appropriately.
 	2. A score of MaxScore means a win for player 1, and MinScore means a win for player 2
+
+At the moment I have plans for major optimizations and more examples

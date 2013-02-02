@@ -8,7 +8,7 @@ type Game interface {
 
 // Just returns the score of a given state.
 func Search(State Game, Depth uint32, Turn bool, Alpha, Beta, MinScore, MaxScore float64) float64 {
-	End := State.EndState()
+	End := State.EndState(Turn)
 	if End == 1 {
 		return MaxScore
 	} else if End == 2 {
@@ -45,7 +45,7 @@ func Search(State Game, Depth uint32, Turn bool, Alpha, Beta, MinScore, MaxScore
 
 // Takes a starting node for the game, and returns the best child node and it's score
 func SolveGame(State Game, Depth uint32, Turn bool, MinScore, MaxScore float64) (Game, float64) {
-	End := State.EndState()
+	End := State.EndState(Turn)
 	if End == 1 {
 		return State, MaxScore
 	} else if End == 2 {
