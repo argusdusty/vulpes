@@ -1,0 +1,19 @@
+Vulpes: A Minimax DFS with Alpha-Beta pruning implementation for arbitrary zero-sum two-player games, written in Go.
+Just supply it with 3 functions defining the game-logic:
+	Children() -> Returns the children of a given state
+	Heuristic() -> Approximates the score of an unfinished game-node-state-thing
+	EndState() -> Returns whether the not the current game has ended, and if so, who won (or tie)
+You must also supply a max/min score, above/below which the heuristic function will never return.
+This can be the double's +-Inf (0x7ff0000000000000, 0xfff0000000000000). Undefined behavior for MinScore > MaxScore
+
+License: CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/)
+You are free to share and remix this work, as long as you attribute the original author, and share it under a similar license
+Author: Mark Canning
+
+To Install: go get github.com/argusdusty/vulpes
+To Update: go get -u github.com/argusdusty/vulpes
+To Use: import "github.com/argusdusty/vulpes"
+
+Notes:
+	1. Because this assumes a zero-sum game, a tie represents a score of 0. Tune your heuristic function appropriately.
+	2. A score of MaxScore means a win for player 1, and MinScore means a win for player 2
