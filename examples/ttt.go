@@ -11,8 +11,8 @@ type TicTacToe struct {
 }
 
 // If Turn, it's the first player's move
-func (T TicTacToe) Children(Turn bool) []Game {
-	Children := make([]Game, 0)
+func (T TicTacToe) Children(Turn bool) []vulpes.Game {
+	Children := make([]vulpes.Game, 0)
 	if Turn {
 		for i := 0; i < 9; i++ {
 			if T.Board[i] == 0 {
@@ -102,12 +102,12 @@ func main() {
 	State := TicTacToe{[9]int{0, 0, 0, 0, 0, 0, 0, 0, 0}}
 	Depth := uint32(9)
 	Turn := true
-	for State.EndState() == 3 {
+	for State.EndState(Turn) == 3 {
 		t := time.Now()
 		Best, Score := vulpes.SolveGame(State, Depth, Turn, -100, 100)
 		State = Best.(TicTacToe)
 		fmt.Println("Board:")
-		fmt.Print(State.ToString)
+		fmt.Print(State.ToString())
 		fmt.Println("Score:", Score)
 		fmt.Println("Time Taken:", time.Now().Sub(t))
 		Turn = !Turn
