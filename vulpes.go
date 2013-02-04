@@ -1,7 +1,5 @@
 package vulpes
 
-import "sort"
-
 type Game interface {
 	Children(Turn bool) []Game   // Determines the children nodes from this one. Must return an empty list
 	Heuristic(Turn bool) float64 // Determines the heuristic score of the current node, from the perspective of the first player
