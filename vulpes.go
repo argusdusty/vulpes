@@ -1,5 +1,7 @@
 package vulpes
 
+import "sort"
+
 type Game interface {
 	Children(Turn bool) []Game   // Determines the children nodes from this one. Must return an empty list
 	Heuristic(Turn bool) float64 // Determines the heuristic score of the current node, from the perspective of the first player
@@ -20,23 +22,95 @@ func Search(State Game, Depth uint32, Turn bool, Alpha, Beta, MinScore, MaxScore
 		return State.Heuristic(Turn)
 	}
 	if Turn {
-		for _, Child := range State.Children(true) {
-			TempScore := Search(Child, Depth-1, false, Alpha, Beta, MinScore, MaxScore)
-			if TempScore >= Alpha {
-				Alpha = TempScore
-				if Beta <= Alpha {
-					return Alpha
+		if Depth <= 3 {
+			for _, Child := range State.Children(true) {
+				TempScore := Search(Child, Depth-1, false, Alpha, Beta, MinScore, MaxScore)
+				if TempScore >= Alpha {
+					Alpha = TempScore
+					if Beta <= Alpha {
+						return Alpha
+					}
+				}
+			}
+		} else {
+			Children := State.Children(true)
+			s := len(Children)
+			Moves := make([]int, s)
+			Scores := make([]float64, s)
+			for i, Child := range Children {
+				Score := Child.Heuristic(true)
+				low := 0
+				high := i
+				for low < high {
+					mid := (low + high) >> 1
+					if Scores[mid] > Score {
+						low = mid + 1
+					} else {
+						high = mid
+					}
+				}
+				Moves[i] = i
+				Scores[i] = Score
+				for j := low; j < i; j++ {
+					Moves[j], Moves[i] = Moves[i], Moves[j]
+					Scores[j], Scores[i] = Scores[i], Scores[j]
+				}
+			}
+			for _, i := range Moves {
+				Child := Children[i]
+				TempScore := Search(Child, Depth-1, false, Alpha, Beta, MinScore, MaxScore)
+				if TempScore >= Alpha {
+					Alpha = TempScore
+					if Beta <= Alpha {
+						return Alpha
+					}
 				}
 			}
 		}
 		return Alpha
 	}
-	for _, Child := range State.Children(false) {
-		TempScore := Search(Child, Depth-1, true, Alpha, Beta, MinScore, MaxScore)
-		if TempScore <= Beta {
-			Beta = TempScore
-			if Beta <= Alpha {
-				return Beta
+	if Depth <= 3 {
+		for _, Child := range State.Children(false) {
+			TempScore := Search(Child, Depth-1, true, Alpha, Beta, MinScore, MaxScore)
+			if TempScore <= Beta {
+				Beta = TempScore
+				if Beta <= Alpha {
+					return Beta
+				}
+			}
+		}
+	} else {
+		Children := State.Children(false)
+		s := len(Children)
+		Moves := make([]int, s)
+		Scores := make([]float64, s)
+		for i, Child := range Children {
+			Score := Child.Heuristic(false)
+			low := 0
+			high := i
+			for low < high {
+				mid := (low + high) >> 1
+				if Scores[mid] < Score {
+					low = mid + 1
+				} else {
+					high = mid
+				}
+			}
+			Moves[i] = i
+			Scores[i] = Score
+			for j := low; j < i; j++ {
+				Moves[j], Moves[i] = Moves[i], Moves[j]
+				Scores[j], Scores[i] = Scores[i], Scores[j]
+			}
+		}
+		for _, i := range Moves {
+			Child := Children[i]
+			TempScore := Search(Child, Depth-1, true, Alpha, Beta, MinScore, MaxScore)
+			if TempScore <= Beta {
+				Beta = TempScore
+				if Beta <= Alpha {
+					return Beta
+				}
 			}
 		}
 	}
