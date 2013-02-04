@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/argusdusty/vulpes"
-	"os"
-	"runtime/pprof"
 	"time"
 )
 
-const DEPTH = uint32(11)
+const DEPTH = uint32(12)
 
 // Computes a heuristic score for a row of 4
 // if all pieces are for the same player, return +-16^n, else 0
@@ -444,12 +442,6 @@ func (C Connect4) ToString() string {
 }
 
 func main() {
-	f, err := os.Create("cpuprof")
-	if err != nil {
-		panic(err)
-	}
-	pprof.StartCPUProfile(f)
-	defer pprof.StopCPUProfile()
 	init_counts()
 	var Board [6][7]int
 	for i := 0; i < 6; i++ {
