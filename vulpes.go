@@ -130,20 +130,88 @@ func SolveGame(State Game, Depth uint32, Turn bool, MinScore, MaxScore float64) 
 	}
 	Best := State
 	if Turn {
-		for _, Child := range State.Children(true) {
-			TempScore := Search(Child, Depth-1, false, MinScore, MaxScore, MinScore, MaxScore)
-			if TempScore > MinScore {
-				Best = Child
-				MinScore = TempScore
+		if Depth <= 3 {
+			for _, Child := range State.Children(true) {
+				TempScore := Search(Child, Depth-1, false, MinScore, MaxScore, MinScore, MaxScore)
+				if TempScore > MinScore {
+					MinScore = TempScore
+					Best = Child
+				}
+			}
+		} else {
+			Children := State.Children(true)
+			s := len(Children)
+			Moves := make([]int, s)
+			Scores := make([]float64, s)
+			for i, Child := range Children {
+				Score := Child.Heuristic(true)
+				low := 0
+				high := i
+				for low < high {
+					mid := (low + high) >> 1
+					if Scores[mid] > Score {
+						low = mid + 1
+					} else {
+						high = mid
+					}
+				}
+				Moves[i] = i
+				Scores[i] = Score
+				for j := low; j < i; j++ {
+					Moves[j], Moves[i] = Moves[i], Moves[j]
+					Scores[j], Scores[i] = Scores[i], Scores[j]
+				}
+			}
+			for _, i := range Moves {
+				Child := Children[i]
+				TempScore := Search(Child, Depth-1, false, MinScore, MaxScore, MinScore, MaxScore)
+				if TempScore > MinScore {
+					MinScore = TempScore
+					Best = Child
+				}
 			}
 		}
 		return Best, MinScore
 	}
-	for _, Child := range State.Children(false) {
-		TempScore := Search(Child, Depth-1, true, MinScore, MaxScore, MinScore, MaxScore)
-		if TempScore < MaxScore {
-			Best = Child
-			MaxScore = TempScore
+	if Depth <= 3 {
+		for _, Child := range State.Children(false) {
+			TempScore := Search(Child, Depth-1, true, MinScore, MaxScore, MinScore, MaxScore)
+			if TempScore < MaxScore {
+				MaxScore = TempScore
+				Best = Child
+			}
+		}
+	} else {
+		Children := State.Children(false)
+		s := len(Children)
+		Moves := make([]int, s)
+		Scores := make([]float64, s)
+		for i, Child := range Children {
+			Score := Child.Heuristic(false)
+			low := 0
+			high := i
+			for low < high {
+				mid := (low + high) >> 1
+				if Scores[mid] < Score {
+					low = mid + 1
+				} else {
+					high = mid
+				}
+			}
+			Moves[i] = i
+			Scores[i] = Score
+			for j := low; j < i; j++ {
+				Moves[j], Moves[i] = Moves[i], Moves[j]
+				Scores[j], Scores[i] = Scores[i], Scores[j]
+			}
+		}
+		for _, i := range Moves {
+			Child := Children[i]
+			TempScore := Search(Child, Depth-1, true, MinScore, MaxScore, MinScore, MaxScore)
+			if TempScore < MaxScore {
+				MaxScore = TempScore
+				Best = Child
+			}
 		}
 	}
 	return Best, MaxScore

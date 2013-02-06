@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const DEPTH = uint32(12)
+const DEPTH = uint32(13)
 
 // Computes a heuristic score for a row of 4
 // if all pieces are for the same player, return +-16^n, else 0
