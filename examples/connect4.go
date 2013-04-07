@@ -139,43 +139,48 @@ func (C Connect4) Heuristic(Turn bool) float64 {
 	score := 0
 
 	b := C.Board
-	// Yes, I know this isn't as good as EndState's
-	a, b1, c, d, e, f, g := b[0][0], b[0][1], b[0][2], b[0][3], b[0][4], b[0][5], b[0][6]
-	h, i, j, k, l, m, n := b[1][0], b[1][1], b[1][2], b[1][3], b[1][4], b[1][5], b[1][6]
-	o, p, q, r, s, t, u := b[2][0], b[2][1], b[2][2], b[2][3], b[2][4], b[2][5], b[2][6]
-	v, w, x, y, z, aa, ab := b[3][0], b[3][1], b[3][2], b[3][3], b[3][4], b[3][5], b[3][6]
-	ac, ad, ae, af, ag, ah, ai := b[4][0], b[4][1], b[4][2], b[4][3], b[4][4], b[4][5], b[4][6]
-	aj, ak, al, am, an, ao, ap := b[5][0], b[5][1], b[5][2], b[5][3], b[5][4], b[5][5], b[5][6]
+	b0, b1, b2, b3, b4, b5 := b[0], b[1], b[2], b[3], b[4], b[5]
+	b00, b01, b02, b03, b04, b05, b06 := b0[0], b0[1], b0[2], b0[3], b0[4], b0[5], b0[6]
+	b10, b11, b12, b13, b14, b15, b16 := b1[0], b1[1], b1[2], b1[3], b1[4], b1[5], b1[6]
+	b20, b21, b22, b23, b24, b25, b26 := b2[0], b2[1], b2[2], b2[3], b2[4], b2[5], b2[6]
+	b30, b31, b32, b33, b34, b35, b36 := b3[0], b3[1], b3[2], b3[3], b3[4], b3[5], b3[6]
+	b40, b41, b42, b43, b44, b45, b46 := b4[0], b4[1], b4[2], b4[3], b4[4], b4[5], b4[6]
+	b50, b51, b52, b53, b54, b55, b56 := b5[0], b5[1], b5[2], b5[3], b5[4], b5[5], b5[6]
 
-	score += count7[729*a+243*b1+81*c+27*d+9*e+3*f+g+1093]
-	score += count7[729*h+243*i+81*j+27*k+9*l+3*m+n+1093]
-	score += count7[729*o+243*p+81*q+27*r+9*s+3*t+u+1093]
-	score += count7[729*v+243*w+81*x+27*y+9*z+3*aa+ab+1093]
-	score += count7[729*ac+243*ad+81*ae+27*af+9*ag+3*ah+ai+1093]
-	score += count7[729*aj+243*ak+81*al+27*am+9*an+3*ao+ap+1093]
+	// Rows
+	score += count7[729*b00+243*b01+81*b02+27*b03+9*b04+3*b05+b06+1093]
+	score += count7[729*b10+243*b11+81*b12+27*b13+9*b14+3*b15+b16+1093]
+	score += count7[729*b20+243*b21+81*b22+27*b23+9*b24+3*b25+b26+1093]
+	score += count7[729*b30+243*b31+81*b32+27*b33+9*b34+3*b35+b36+1093]
+	score += count7[729*b40+243*b41+81*b42+27*b43+9*b44+3*b45+b46+1093]
+	score += count7[729*b50+243*b51+81*b52+27*b53+9*b54+3*b55+b56+1093]
 
-	score += count6[243*a+81*h+27*o+9*v+3*ac+aj+364]
-	score += count6[243*b1+81*i+27*p+9*w+3*ad+ak+364]
-	score += count6[243*c+81*j+27*q+9*x+3*ae+al+364]
-	score += count6[243*d+81*k+27*r+9*y+3*af+am+364]
-	score += count6[243*e+81*l+27*s+9*z+3*ag+an+364]
-	score += count6[243*f+81*m+27*t+9*aa+3*ah+ao+364]
-	score += count6[243*g+81*n+27*u+9*ab+3*ai+ap+364]
+	// Columns
+	score += count6[243*b00+81*b10+27*b20+9*b30+3*b40+b50+364]
+	score += count6[243*b01+81*b11+27*b21+9*b31+3*b41+b51+364]
+	score += count6[243*b02+81*b12+27*b22+9*b32+3*b42+b52+364]
+	score += count6[243*b03+81*b13+27*b23+9*b33+3*b43+b53+364]
+	score += count6[243*b04+81*b14+27*b24+9*b34+3*b44+b54+364]
+	score += count6[243*b05+81*b15+27*b25+9*b35+3*b45+b55+364]
+	score += count6[243*b06+81*b16+27*b26+9*b36+3*b46+b56+364]
 
-	score += count6[243*a+81*i+27*q+9*y+3*ag+ao+364]
-	score += count6[243*aj+81*ad+27*x+9*r+3*l+f+364]
-	score += count6[243*b1+81*j+27*r+9*z+3*ah+ap+364]
-	score += count6[243*ak+81*ae+27*y+9*s+3*m+g+364]
+	// Length-6 diagonals
+	score += count6[243*b00+81*b11+27*b22+9*b33+3*b44+b55+364]
+	score += count6[243*b50+81*b41+27*b32+9*b23+3*b14+b05+364]
+	score += count6[243*b01+81*b12+27*b23+9*b34+3*b45+b56+364]
+	score += count6[243*b51+81*b42+27*b33+9*b24+3*b15+b06+364]
 
-	score += count5[81*c+27*k+9*s+3*aa+ai+121]
-	score += count5[81*al+27*af+9*z+3*t+n+121]
-	score += count5[81*h+27*p+9*x+3*af+an+121]
-	score += count5[81*ac+27*w+9*q+3*k+e+121]
+	// Length 5 diagonals
+	score += count5[81*b02+27*b13+9*b24+3*b35+b46+121]
+	score += count5[81*b52+27*b43+9*b34+3*b25+b16+121]
+	score += count5[81*b10+27*b21+9*b32+3*b43+b54+121]
+	score += count5[81*b40+27*b31+9*b22+3*b13+b04+121]
 
-	score += count4[27*d+9*l+3*t+ab+40]
-	score += count4[27*am+9*ag+3*aa+u+40]
-	score += count4[27*o+9*w+3*ae+am+40]
-	score += count4[27*v+9*p+3*j+d+40]
+	// Length 4 diagonals
+	score += count4[27*b03+9*b14+3*b25+b36+40]
+	score += count4[27*b53+9*b44+3*b35+b26+40]
+	score += count4[27*b20+9*b31+3*b42+b53+40]
+	score += count4[27*b30+9*b21+3*b12+b03+40]
 
 	return float64(score)
 }
@@ -229,7 +234,7 @@ func (C Connect4) EndState(Turn bool) uint8 {
 		x1 = (b24 == b23)
 		x2 = (b22 == b23)
 		if (((b21 == b23) && x2) && ((b20 == b23) || x1)) || ((x2 || (b26 == b23)) && ((b25 == b23) && x1)) {
-			if b03 == 1 {
+			if b23 == 1 {
 				return 1
 			}
 			return 2
