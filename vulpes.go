@@ -1,218 +1,94 @@
 package vulpes
 
+import (
+	"math"
+	"sort"
+)
+
+const (
+	// LOSS means the game is over and the current player has lost the game.
+	LOSS = iota
+	// TIE means the game is over and ended in a tie.
+	TIE
+	// WIN means the game is over and the current player has won the game.
+	WIN
+	// UNFINISHED means the game is not yet over.
+	UNFINISHED
+)
+
+// Game describes a two-player, zero-sum, turn-based game.
 type Game interface {
-	Children(Turn bool) []Game   // Determines the children nodes from this one. Must return an empty list
-	Heuristic(Turn bool) float64 // Determines the heuristic score of the current node, from the perspective of the first player
-	EndState(Turn bool) uint8    // 0 for tie, 1 for first player win, 2 for loss, 3 for not ended
+	// Children returns the child nodes from this one. If the game is not ended, this must return at least 1 child.
+	Children() []Game
+	// Evaluate returns an evaluation of the current game state from the perspective of the current player. 'ending' must be one of {LOSS, TIE, WIN, UNFINISHED}. 'heuristic' is only required when ending is UNFINISHED.
+	Evaluate() (ending int, heuristic float64)
 }
 
-// Just returns the score of a given state.
-func Search(State Game, Depth uint32, Turn bool, Alpha, Beta, MinScore, MaxScore float64) float64 {
-	End := State.EndState(Turn)
-	if End == 1 {
-		return MaxScore
-	} else if End == 2 {
-		return MinScore
-	} else if End == 0 {
-		return 0
-	}
-	if Depth <= 0 {
-		return State.Heuristic(Turn)
-	}
-	if Turn {
-		if Depth <= 3 {
-			for _, Child := range State.Children(true) {
-				TempScore := Search(Child, Depth-1, false, Alpha, Beta, MinScore, MaxScore)
-				if TempScore >= Alpha {
-					Alpha = TempScore
-					if Beta <= Alpha {
-						return Alpha
-					}
-				}
-			}
-		} else {
-			Children := State.Children(true)
-			s := len(Children)
-			Moves := make([]int, s)
-			Scores := make([]float64, s)
-			for i, Child := range Children {
-				Score := Child.Heuristic(true)
-				low := 0
-				high := i
-				for low < high {
-					mid := (low + high) >> 1
-					if Scores[mid] > Score {
-						low = mid + 1
-					} else {
-						high = mid
-					}
-				}
-				Moves[i] = i
-				Scores[i] = Score
-				for j := low; j < i; j++ {
-					Moves[j], Moves[i] = Moves[i], Moves[j]
-					Scores[j], Scores[i] = Scores[i], Scores[j]
-				}
-			}
-			for _, i := range Moves {
-				Child := Children[i]
-				TempScore := Search(Child, Depth-1, false, Alpha, Beta, MinScore, MaxScore)
-				if TempScore >= Alpha {
-					Alpha = TempScore
-					if Beta <= Alpha {
-						return Alpha
-					}
-				}
-			}
-		}
-		return Alpha
-	}
-	if Depth <= 3 {
-		for _, Child := range State.Children(false) {
-			TempScore := Search(Child, Depth-1, true, Alpha, Beta, MinScore, MaxScore)
-			if TempScore <= Beta {
-				Beta = TempScore
-				if Beta <= Alpha {
-					return Beta
-				}
-			}
-		}
-	} else {
-		Children := State.Children(false)
-		s := len(Children)
-		Moves := make([]int, s)
-		Scores := make([]float64, s)
-		for i, Child := range Children {
-			Score := Child.Heuristic(false)
-			low := 0
-			high := i
-			for low < high {
-				mid := (low + high) >> 1
-				if Scores[mid] < Score {
-					low = mid + 1
-				} else {
-					high = mid
-				}
-			}
-			Moves[i] = i
-			Scores[i] = Score
-			for j := low; j < i; j++ {
-				Moves[j], Moves[i] = Moves[i], Moves[j]
-				Scores[j], Scores[i] = Scores[i], Scores[j]
-			}
-		}
-		for _, i := range Moves {
-			Child := Children[i]
-			TempScore := Search(Child, Depth-1, true, Alpha, Beta, MinScore, MaxScore)
-			if TempScore <= Beta {
-				Beta = TempScore
-				if Beta <= Alpha {
-					return Beta
-				}
-			}
-		}
-	}
-	return Beta
+type moveScore struct {
+	moveIndex int
+	moveScore float64
 }
 
-// Takes a starting node for the game, and returns the best child node and it's score
-func SolveGame(State Game, Depth uint32, Turn bool, MinScore, MaxScore float64) (Game, float64) {
-	End := State.EndState(Turn)
-	if End == 1 {
-		return State, MaxScore
-	} else if End == 2 {
-		return State, MinScore
-	} else if End == 0 {
-		return State, 0
+type moveScores []moveScore
+
+func (s moveScores) Len() int           { return len(s) }
+func (s moveScores) Less(i, j int) bool { return s[i].moveScore > s[j].moveScore }
+func (s moveScores) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+// Search returns the computed score of a given state.
+func Search(state Game, depth uint, alpha, beta float64) (Game, float64) {
+	ending, heuristic := state.Evaluate()
+	switch ending {
+	case LOSS:
+		return state, math.Inf(-1)
+	case TIE:
+		return state, 0
+	case WIN:
+		return state, math.Inf(1)
 	}
-	if Depth <= 0 {
-		return State, State.Heuristic(Turn)
+	if depth == 0 {
+		return state, heuristic
 	}
-	Best := State
-	if Turn {
-		if Depth <= 3 {
-			for _, Child := range State.Children(true) {
-				TempScore := Search(Child, Depth-1, false, MinScore, MaxScore, MinScore, MaxScore)
-				if TempScore > MinScore {
-					MinScore = TempScore
-					Best = Child
-				}
-			}
-		} else {
-			Children := State.Children(true)
-			s := len(Children)
-			Moves := make([]int, s)
-			Scores := make([]float64, s)
-			for i, Child := range Children {
-				Score := Child.Heuristic(true)
-				low := 0
-				high := i
-				for low < high {
-					mid := (low + high) >> 1
-					if Scores[mid] > Score {
-						low = mid + 1
-					} else {
-						high = mid
-					}
-				}
-				Moves[i] = i
-				Scores[i] = Score
-				for j := low; j < i; j++ {
-					Moves[j], Moves[i] = Moves[i], Moves[j]
-					Scores[j], Scores[i] = Scores[i], Scores[j]
-				}
-			}
-			for _, i := range Moves {
-				Child := Children[i]
-				TempScore := Search(Child, Depth-1, false, MinScore, MaxScore, MinScore, MaxScore)
-				if TempScore > MinScore {
-					MinScore = TempScore
-					Best = Child
-				}
+	children := state.Children()
+	moveScores := make(moveScores, len(children))
+	for i := range children {
+		moveScores[i] = moveScore{i, 0.0}
+	}
+	var tmpScore float64
+	if depth > 1 {
+		// Pre-sort the possible moves by their score to speed up the pruning
+		for i, child := range children {
+			// Depth-0 search to force heuristic scoring
+			_, tmpScore = Search(child, 0, -beta, -alpha)
+			moveScores[i].moveScore = -tmpScore
+		}
+		sort.Sort(moveScores)
+	}
+	var bestChild Game
+	for _, moveScore := range moveScores {
+		child := children[moveScore.moveIndex]
+		_, tmpScore = Search(child, depth-1, -beta, -alpha)
+		tmpScore = -tmpScore
+		if tmpScore > alpha {
+			alpha = tmpScore
+			bestChild = child
+			if beta <= alpha {
+				return bestChild, beta
 			}
 		}
-		return Best, MinScore
-	}
-	if Depth <= 3 {
-		for _, Child := range State.Children(false) {
-			TempScore := Search(Child, Depth-1, true, MinScore, MaxScore, MinScore, MaxScore)
-			if TempScore < MaxScore {
-				MaxScore = TempScore
-				Best = Child
-			}
-		}
-	} else {
-		Children := State.Children(false)
-		s := len(Children)
-		Moves := make([]int, s)
-		Scores := make([]float64, s)
-		for i, Child := range Children {
-			Score := Child.Heuristic(false)
-			low := 0
-			high := i
-			for low < high {
-				mid := (low + high) >> 1
-				if Scores[mid] < Score {
-					low = mid + 1
-				} else {
-					high = mid
-				}
-			}
-			Moves[i] = i
-			Scores[i] = Score
-			for j := low; j < i; j++ {
-				Moves[j], Moves[i] = Moves[i], Moves[j]
-				Scores[j], Scores[i] = Scores[i], Scores[j]
-			}
-		}
-		for _, i := range Moves {
-			Child := Children[i]
-			TempScore := Search(Child, Depth-1, true, MinScore, MaxScore, MinScore, MaxScore)
-			if TempScore < MaxScore {
-				MaxScore = TempScore
-				Best = Child
-			}
+		if bestChild == nil {
+			// Take the first child, in case all the children are terrible.
+			bestChild = child
 		}
 	}
-	return Best, MaxScore
+	if bestChild == nil {
+		// No possible moves, so return the current state.
+		bestChild = state
+	}
+	return bestChild, alpha
+}
+
+// SolveGame takes a starting node for the game, and returns the best child node and its score, after searching to the specified depth
+func SolveGame(state Game, depth uint) (Game, float64) {
+	return Search(state, depth, math.Inf(-1), math.Inf(1))
 }
