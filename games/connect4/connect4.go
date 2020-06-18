@@ -80,9 +80,9 @@ func NewEmptyAI() *AI {
 
 // NewAI returns a Connect4 AI from a given board
 func NewAI(board [6][7]int) *AI {
-	var currentPlayer bitboard = 0
-	var nextPlayer bitboard = 0
-	var sum int = 0
+	var currentPlayer bitboard
+	var nextPlayer bitboard
+	var sum int
 	for i := 0; i < 6; i++ {
 		for j := 0; j < 7; j++ {
 			sum += board[i][j]

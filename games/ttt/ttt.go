@@ -25,7 +25,40 @@ func (t ttt) Children() []vulpes.Game {
 	return children
 }
 
-// We want to solve TTT, not approximate it
+func midpointEval(a, b, c, d, e, f, g, h, i int, turn bool) int {
+	if e == 0 {
+		return vulpes.UNFINISHED
+	}
+	if (a == e && e == i) || (b == e && e == h) || (c == e && e == g) || (d == e && e == f) {
+		if (e == 1) == turn {
+			return vulpes.WIN
+		}
+		return vulpes.LOSS
+	}
+	return vulpes.UNFINISHED
+}
+
+func cornerEval(a, b, c, d, g int, turn bool) int {
+	if a == 0 {
+		return vulpes.UNFINISHED
+	}
+	if (a == b && a == c) || (a == d && a == g) {
+		if (a == 1) == turn {
+			return vulpes.WIN
+		}
+		return vulpes.LOSS
+	}
+	return vulpes.UNFINISHED
+}
+
+func tieEval(a, b, c, d, e, f, g, h, i int) int {
+	if a == 0 || b == 0 || c == 0 || d == 0 || e == 0 || f == 0 || g == 0 || h == 0 || i == 0 {
+		return vulpes.UNFINISHED
+	}
+	return vulpes.TIE
+}
+
+// We want to solve TTT, not approximate it, so heuristic is always 0
 func (t ttt) Evaluate() (ending int, heuristic float64) {
 	a := t.board[0]
 	b := t.board[1]
@@ -36,34 +69,19 @@ func (t ttt) Evaluate() (ending int, heuristic float64) {
 	g := t.board[6]
 	h := t.board[7]
 	i := t.board[8]
-	if e != 0 {
-		if (a == e && e == i) || (b == e && e == h) || (c == e && e == g) || (d == e && e == f) {
-			if (e == 1) == t.turn {
-				return vulpes.WIN, 0
-			}
-			return vulpes.LOSS, 0
-		}
+	v := midpointEval(a, b, c, d, e, f, g, h, i, t.turn)
+	if v != vulpes.UNFINISHED {
+		return v, 0
 	}
-	if a != 0 {
-		if (a == b && a == c) || (a == d && a == g) {
-			if (a == 1) == t.turn {
-				return vulpes.WIN, 0
-			}
-			return vulpes.LOSS, 0
-		}
+	v = cornerEval(a, b, c, d, g, t.turn)
+	if v != vulpes.UNFINISHED {
+		return v, 0
 	}
-	if i != 0 {
-		if (c == i && f == i) || (g == i && h == i) {
-			if (i == 1) == t.turn {
-				return vulpes.WIN, 0
-			}
-			return vulpes.LOSS, 0
-		}
+	v = cornerEval(i, h, g, f, c, t.turn)
+	if v != vulpes.UNFINISHED {
+		return v, 0
 	}
-	if a == 0 || b == 0 || c == 0 || d == 0 || e == 0 || f == 0 || g == 0 || h == 0 || i == 0 {
-		return vulpes.UNFINISHED, 0
-	}
-	return vulpes.TIE, 0
+	return tieEval(a, b, c, d, e, f, g, h, i), 0
 }
 
 func (t ttt) String() string {

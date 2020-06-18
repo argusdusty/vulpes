@@ -195,7 +195,7 @@ func (bf bruteForceBitboard) invert() bruteForceBitboard {
 }
 
 func (bf bruteForceBitboard) popcount() int {
-	var c int = 0
+	var c int
 	bf.apply(func(i, j int) {
 		if bf.index(i, j) {
 			c++
@@ -211,7 +211,7 @@ func (bf bruteForceBitboard) heur(taken bruteForceBitboard) int {
 			obf = obf.set(i, j)
 		}
 	})
-	var heur int = 0
+	var heur int
 	bf.apply4(func(i, j, mi, mj int) {
 		c := bf.cnt4(i, j, mi, mj)
 		oc := obf.cnt4(i, j, mi, mj)

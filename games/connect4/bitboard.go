@@ -32,7 +32,7 @@ func (b bitboard) isWin() bool {
 }
 
 func (b bitboard) heur(taken bitboard) int {
-	var heur int = 0
+	var heur int
 	ob := taken ^ b
 
 	x1 := b >> 1
