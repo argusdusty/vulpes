@@ -99,7 +99,7 @@ func NewEmptyAI() *AI {
 
 // NewAI returns a Tic-Tac-Toe AI from a given board
 func NewAI(board [9]int) *AI {
-	var sum int = 0
+	var sum int
 	for i := 0; i < 9; i++ {
 		sum += board[i]
 	}

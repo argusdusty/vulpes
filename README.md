@@ -15,3 +15,10 @@ type Game interface {
 	Evaluate() (ending int, heuristic float64)
 }
 ```
+
+[travis-ci-badge]:   https://api.travis-ci.org/argusdusty/vulpes.svg?branch=master
+[travis-ci]:         https://api.travis-ci.org/argusdusty/vulpes
+[godoc-badge]:       https://godoc.org/github.com/argusdusty/vulpes?status.svg
+[godoc]:             https://godoc.org/github.com/argusdusty/vulpes
+[report-card-badge]: https://goreportcard.com/badge/github.com/argusdusty/vulpes
+[report-card]:       https://goreportcard.com/report/github.com/argusdusty/vulpes

@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	filledBoard = bitboard(0b0111111011111101111110111111011111101111110111111)
+	// 0b0111111011111101111110111111011111101111110111111
+	filledBoard = bitboard(279258638311359)
 	colMask     = filledBoard & (filledBoard >> 1) & (filledBoard >> 2) & (filledBoard >> 3)
 	rowMask     = filledBoard & (filledBoard >> 7) & (filledBoard >> 14) & (filledBoard >> 21)
 	ldiagMask   = filledBoard & (filledBoard >> 8) & (filledBoard >> 16) & (filledBoard >> 24)
